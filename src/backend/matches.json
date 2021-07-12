@@ -1,34 +1,33 @@
 {
-  "matches": [
-    {
-      "matchID": "1",
-      "competition": "UEFA Champions League",
-      "teamA": "Bayern",
-      "teamB": "PSG",
-      "Tie": "3",
-      "Team_A_Win": "2",
-      "Team_B_Win": "3",
-      "gameday": "August 3rd, 2021"
-    },
-    {
-      "matchID": "2",
-      "competition": "UEFA Champions League",
-      "teamA": "Crvena Zvezda",
-      "teamB": "Milano",
-      "Tie": "2",
-      "Team_A_Win": "10",
-      "Team_B_Win": "2",
-      "gameday": "August 4th, 2021"
-  	},
-	{
-  	"matchID": "3",
-  	"competition": "Srpska Liga",
-  	"teamA": "Radnicki",
-  	"teamB": "Partizan",
-  	"Tie": "2",
-  	"Team_A_Win": "3",
-  	"Team_B_Win": "5",
-  	"gameday": "August 16th, 2021"
-    }
-  ]
+	"matches": [{
+			"matchID": "1",
+			"competition": "UEFA Champions League",
+			"teamA": "Bayern",
+			"teamB": "PSG",
+			"Tie": "3",
+			"Team_A_Win": "2",
+			"Team_B_Win": "3",
+			"gameday": "August 3rd, 2021"
+		},
+		{
+			"matchID": "2",
+			"competition": "UEFA Champions League",
+			"teamA": "Crvena Zvezda",
+			"teamB": "Milano",
+			"Tie": "2",
+			"Team_A_Win": "10",
+			"Team_B_Win": "2",
+			"gameday": "August 4th, 2021"
+		},
+		{
+			"matchID": "3",
+			"competition": "Srpska Liga",
+			"teamA": "Radnicki",
+			"teamB": "Partizan",
+			"Tie": "2",
+			"Team_A_Win": "3",
+			"Team_B_Win": "5",
+			"gameday": "August 16th, 2021"
+		}
+	]
 }
