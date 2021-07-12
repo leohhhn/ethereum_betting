@@ -1,23 +1,29 @@
 console.log("client side js running");
 
-let matches;
 const btnGetMatches = document.getElementById('btnGetMatches');
 const connectMMButton = document.getElementById("btnConnectMM");
 const accountParag = document.getElementById("accountParag");
 
-let flag = 0; // already loaded data from json into table - wont change as it is static (for now)
+const betsPlaced = new Map();
+
+let matches;
+let jsonIsLoaded = 0; // already loaded data from json into table - wont change as it is static (for now)
 let accounts;
+let current_account;
+let mmConnected = 0;
+let dynButtonIDs = [];
 
 // metamask integration
 
 connectMMButton.addEventListener('click', (e) => {
-
 	if (typeof window.ethereum !== 'undefined') {
 		//	console.log("metamask is installed");
 		getAccounts();
 		connectMMButton.disabled = true;
+		mmConnected = 1;
 	} else {
 		alert("Please install MetaMask to use this app.");
+		return;
 	}
 });
 
@@ -25,11 +31,17 @@ async function getAccounts() {
 	accounts = await ethereum.request({
 		method: 'eth_requestAccounts'
 	});
-	let curr_acc = accounts[0];
-	accountParag.innerHTML = "Account: " + curr_acc;
+	current_account = accounts[0];
+	accountParag.innerHTML = "Account: " + current_account;
 	connectMMButton.classList.add('btn-success');
 	connectMMButton.innerHTML = "Connected to Metamask!";
+
 }
+
+window.ethereum.on('accountsChanged', function(accounts) {
+	current_account = accounts[0];
+	accountParag.innerHTML = "Account: " + current_account;
+});
 
 // event listeners
 
@@ -53,49 +65,66 @@ function addDynEventListeners(buttonIDs) {
 	// IDs in html start from 1
 
 	for (let i = 0; i < buttonIDs.length; i++) {
-		console.log("addEventListener for " + buttonIDs[i]);
+
 		$(document).on('click', '#' + buttonIDs[i], function() {
 
-					let curr_acc = accounts[0];
-					let betAmount = document.getElementById(`betAmount${i+1}`).value;
-					let radioButtons = document.getElementsByName(`selectBetType${i+1}`);
-					let typeOfBet = -1; // typeOfBet (0, 1, 2) - (Tie, TeamA, TeamB)
+			if (typeof accounts === 'undefined') {
+				alert("MetaMask not connected or has error");
+				return;
+			}
 
-					for (let j = 0; j < radioButtons.length; j++) {
-						if (radioButtons[j].checked)
-							typeOfBet = j;
-					}
-					if (betAmount <= 0 || typeof betAmount === 'undefined') {
-						//	TODO check if empty <input> returns undefined or just ''
-						alert('Must place bet amount');
-						return;
-					} else if (typeof accounts[0] === 'undefined') {
-						alert('Error with current account, check MetaMask');
-						return;
-					} else if (typeOfBet == -1) {
-						alert('What are you betting on?');
-						return;
-					} else {
-						console.log("Successful bet!", {betAmount: betAmount, typeOfBet: typeOfBet, Account: accounts[0]});
-					}
-				}
-			);
-		}
+			let betAmount = document.getElementById(`betAmount${i+1}`).value;
+			let radioButtons = document.getElementsByName(`selectBetType${i+1}`);
+			let typeOfBet = -1; // typeOfBet (0, 1, 2) - (Tie, TeamA, TeamB)
 
+			for (let j = 0; j < radioButtons.length; j++) {
+				if (radioButtons[j].checked)
+					typeOfBet = j;
+			}
+			if (betAmount < 10000 || betAmount == '') {
+				//	TODO check if empty <input> returns undefined or just ''
+				alert('Minimum bet amount is 10k wei');
+				return;
+			} else if (typeOfBet == -1) {
+				alert('What are you betting on?');
+				return;
+			} else {
+
+				const placedBet = {
+					matchID: i, // backend matchIDs start from 0
+					betAmount: betAmount,
+					typeOfBet: typeOfBet,
+					Account: current_account
+				};
+
+				fetch('/sendBet', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(placedBet)
+				});
+
+				// TODO send obj to backend via POST
+
+				// TODO disable already clicked bet button
+
+				alert("Bet successfully placed! Good luck!");
+				console.log("Successful bet!", placedBet);
+
+			}
+		});
+	}
 }
 
-window.ethereum.on('accountsChanged', function(accounts) {
-	accountParag.innerHTML = "Account: " + accounts[0];
-});
 
 // build matches table
 
 function buildTable(matchObj) {
 	let table = document.getElementById('matchTable');
 	let matches = matchObj.matches; // array of matches
-	let dynButtonIDs = [];
 
-	if (flag == 0) {
+	if (jsonIsLoaded == 0) {
 		for (let i = 0; i < matches.length; i++) {
 			let row = `
 			<tr>
@@ -115,10 +144,9 @@ function buildTable(matchObj) {
 			</tr>
 		  `;
 			table.innerHTML += row;
-
 			dynButtonIDs[i] = `btnGetMatches${i+1}`; // 0th button has id 1
 		}
-		flag = 1;
+		jsonIsLoaded = 1;
 		//console.log(dynButtonIDs);
 		addDynEventListeners(dynButtonIDs);
 
