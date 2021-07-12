@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<head>
+	<meta charset="UTF-8">
+	<title< /title>
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+		<style>
+			body {
+				padding-top: 50px;
+			}
+		</style>
+</head>
+
+<body>
+	<div class="jumbotron">
+		<div class="col text-center">
+			<p class="h1 pb-3">Ethereum Betting Platform</p>
+			<button type="button" id="btnConnectMM" class="btn btn-primary btn-lg">Connect with MetaMask</button>
+			<button type="button" id="btnGetMatches" class="btn btn-primary btn-lg">Show all available matches</button>
+			<p id="accountParag" class="h3 pt-3 mt-3">Account: None </p>
+		</div>
+	</div>
+
+	<table class="table">
+		<thead>
+			<tr>
+				<th scope="col">#</th>
+				<th scope="col">League</th>
+				<th scope="col">Team A</th>
+				<th scope="col">Team B</th>
+				<th scope="col">Tie Quote</th>
+				<th scope="col">Team A Quote</th>
+				<th scope="col">Team B Quote</th>
+				<th scope="col">Gameday</th>
+				<th scope="col">Bet on Tie</th>
+				<th scope="col">Bet on Team A</th>
+				<th scope="col">Bet on Team B</th>
+				<th scope="col">Bet amount in wei</th>
+				<th scope="col">Place a bet</th>
+			</tr>
+		</thead>
+		<tbody id="matchTable">
+		</tbody>
+	</table>
+</body>
+
+<script src="frontend/client.js"></script>
+
+
+</html>
