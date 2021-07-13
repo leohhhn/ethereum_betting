@@ -34,38 +34,8 @@ async function init() {
 	}
 
 	let matches = matchesObj.matches;
-
 	contractOwner = await contractInstance.methods.owner().call();
 
-	let contractAbi = eth.contract(Betting);
-	let myContract = contractAbi.at(contractAddress);
-	
-	web3.eth.sendTransaction({
-		to: Contractaddress,
-		from: Accountaddress,
-		data: getData
-	}, , function(err, txHash) {
-		if (err != null) {
-			console.error("Error while sending transaction: " + err);
-		} else {
-			console.log("Transaction Sent here's you  txHash: " + txHash);
-		}
-	});
-
-	const transaction = {
-		from: web3.eth.coinbase,
-		to: receiverAddress,
-		value: '0x00',
-		gas: gasEstimate + 1,
-		gasPrice: gasPrice + 1,
-		data: setData
-	}
-
-
-	web3.eth.sendTransaction(transaction);
-
-	//console.log(await contractInstance.methods.matchExists_f(2).call());
-	//console.log(await contractInstance.methods.matches(0).call())
 }
 
 init();

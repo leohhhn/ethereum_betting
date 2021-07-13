@@ -34,6 +34,7 @@ contract Betting {
         owner = msg.sender;
         bettingAdmins[owner] = 1;
         betDeadline = block.timestamp + 365 days; // example deadline
+		makeMatches();
     }
 
     modifier onlyAdmin(){
@@ -41,16 +42,20 @@ contract Betting {
         _;
     }
 
-    function makeMatch(uint16 matchID, uint8 tieQuote, uint8 teamAQuote, uint8 teamBQuote) public onlyAdmin {
-        require(matchExists[matchID] == 0, "match already exists");
-		matchExists[matchID] = 1;
+	function makeMatches() internal {
+		makeMatch(1, 3, 2, 3);
+		makeMatch(2, 2, 9, 2);
+		makeMatch(3, 2, 3, 5);
+		makeMatch(4, 2, 3, 5);
+		makeMatch(5, 2, 3, 5);
+		makeMatch(6, 2, 3, 5);
+	}
+
+	function makeMatch(uint16 matchID, uint8 tieQuote, uint8 teamAQuote, uint8 teamBQuote) public onlyAdmin {
+  	  require(matchExists[matchID] == 0, "match already exists");
+  	  matchExists[matchID] = 1;
     }
 
-	function makeMatches(Match[] memory passedMatches) external onlyAdmin returns(bool){
-		for(uint i = 0; i < passedMatches.length; i++){
-			makeMatch(passedMatches[i].matchID, passedMatches[i].Tie, passedMatches[i].Team_A_Win, passedMatches[i].Team_B_Win );
-		}
-	}
     function placeBet(uint16 matchID, uint8 bettingType, uint16 oddsForWinning) external payable {
         // bettingType (0, 1, 2) - (Tie, TeamA, TeamB)
 
