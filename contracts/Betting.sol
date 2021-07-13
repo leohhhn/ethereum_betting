@@ -22,7 +22,6 @@ contract Betting {
         uint16 oddsForWinning;
     }
 
-    Match [] public matches;
     address [] public winners;
 
     mapping(uint16 => uint8) matchExists; // matchID => 0, 1
@@ -34,7 +33,7 @@ contract Betting {
        	//require(msg.value == 1 ether, "initial amount should be 1 eth");
         owner = msg.sender;
         bettingAdmins[owner] = 1;
-        betDeadline = block.timestamp + 7 days; // example deadline
+        betDeadline = block.timestamp + 365 days; // example deadline
     }
 
     modifier onlyAdmin(){
@@ -43,13 +42,15 @@ contract Betting {
     }
 
     function makeMatch(uint16 matchID, uint8 tieQuote, uint8 teamAQuote, uint8 teamBQuote) public onlyAdmin {
-        // testing function
-
         require(matchExists[matchID] == 0, "match already exists");
-        matches.push(Match(matchID, tieQuote, teamAQuote, teamBQuote));
-
+		matchExists[matchID] = 1;
     }
 
+	function makeMatches(Match[] memory passedMatches) external onlyAdmin returns(bool){
+		for(uint i = 0; i < passedMatches.length; i++){
+			makeMatch(passedMatches[i].matchID, passedMatches[i].Tie, passedMatches[i].Team_A_Win, passedMatches[i].Team_B_Win );
+		}
+	}
     function placeBet(uint16 matchID, uint8 bettingType, uint16 oddsForWinning) external payable {
         // bettingType (0, 1, 2) - (Tie, TeamA, TeamB)
 
@@ -77,7 +78,6 @@ contract Betting {
                 payable(matchesPlacedBets[matchID][i].better).transfer(total - fee);
             }
         }
-
         emit payoutComplete(winners);
     }
 
@@ -89,4 +89,10 @@ contract Betting {
 		delete bettingAdmins[adminAddress];
 	}
 
+
+	function matchExists_f(uint16 matchID) view external onlyAdmin returns(bool){
+		if(matchExists[matchID] == 1)
+			return true;
+		return false;
+	}
 }

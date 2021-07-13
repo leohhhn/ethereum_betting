@@ -4,12 +4,11 @@ const btnGetMatches = document.getElementById('btnGetMatches');
 const connectMMButton = document.getElementById("btnConnectMM");
 const accountParag = document.getElementById("accountParag");
 
-const betsPlaced = new Map();
-
 let matches;
 let jsonIsLoaded = 0; // already loaded data from json into table - wont change as it is static (for now)
 let accounts;
 let current_account;
+let isOwner = false;
 let mmConnected = 0;
 let dynButtonIDs = [];
 
@@ -25,6 +24,7 @@ connectMMButton.addEventListener('click', (e) => {
 		alert("Please install MetaMask to use this app.");
 		return;
 	}
+
 });
 
 async function getAccounts() {
@@ -33,14 +33,46 @@ async function getAccounts() {
 	});
 	current_account = accounts[0];
 	accountParag.innerHTML = "Account: " + current_account;
+	getOwner();
 	connectMMButton.classList.add('btn-success');
 	connectMMButton.innerHTML = "Connected to Metamask!";
 
 }
 
+async function getOwner() {
+	fetch('/contractowner', {
+		method: 'GET'
+	}).then(
+		res => {
+			if (res.ok)
+				return res.json();
+		}
+	).then((contractOwner) => {
+		if (contractOwner.toLowerCase() === current_account) {
+			console.log("youre the owner!!");
+			isOwner = true;
+
+
+			//enable admin dashboard
+
+		} else {
+			isOwner = false; // if changed accounts reset bool
+		}
+
+
+
+
+	}).catch((e) => console.log(e, "wtf"));
+}
+
+
 window.ethereum.on('accountsChanged', function(accounts) {
 	current_account = accounts[0];
 	accountParag.innerHTML = "Account: " + current_account;
+	getOwner();
+
+	//fetch('/')
+
 });
 
 // event listeners
@@ -65,7 +97,6 @@ function addDynEventListeners(buttonIDs) {
 	// IDs in html start from 1
 
 	for (let i = 0; i < buttonIDs.length; i++) {
-
 		$(document).on('click', '#' + buttonIDs[i], function() {
 
 			if (typeof accounts === 'undefined') {
@@ -89,6 +120,7 @@ function addDynEventListeners(buttonIDs) {
 				alert('What are you betting on?');
 				return;
 			} else {
+				// creating and sending a bet
 
 				const placedBet = {
 					matchID: i, // backend matchIDs start from 0
@@ -104,8 +136,6 @@ function addDynEventListeners(buttonIDs) {
 					},
 					body: JSON.stringify(placedBet)
 				});
-
-				// TODO send obj to backend via POST
 
 				// TODO disable already clicked bet button
 

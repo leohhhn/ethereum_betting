@@ -10,7 +10,7 @@
 		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 		<style>
 			body {
-				padding-top: 50px;
+				margin: 50px;
 			}
 		</style>
 </head>
@@ -18,14 +18,37 @@
 <body>
 	<div class="jumbotron">
 		<div class="col text-center">
-			<p class="h1 pb-3">Ethereum Betting Platform</p>
+			<p class="h1 pb-3"><strong>Ethereum Betting Platform</strong></p>
 			<button type="button" id="btnConnectMM" class="btn btn-primary btn-lg">Connect with MetaMask</button>
 			<button type="button" id="btnGetMatches" class="btn btn-primary btn-lg">Show all available matches</button>
 			<p id="accountParag" class="h3 pt-3 mt-3">Account: None </p>
 		</div>
 	</div>
 
-	<table class="table">
+	<div id="ownerDashboard" class="jumbotron my-container mx-auto border border-dark pt-2" style="display: none">
+		<div class="row m-2">
+			<p class="h2 mx-auto">Welcome to the Admin Dashboard!</p>
+		</div>
+		<div class="row m-2">
+		</div>
+		<div class="row m-2">
+			<div class="col text-center">
+				<button type="button" id="btnPayoutBets" class="btn btn-primary">Payout Bets</button>
+			</div>
+			<div class="col text-center">
+				<button type="button" id="btnAddAdmin" class="btn btn-primary">Add an admin</button>
+			</div>
+		</div>
+		<div class="row m-2">
+			<div class="col text-center" id="winnersDiv">
+				Winners: ssssssssssssssssssssssssssssssss
+			</div>
+			<div class="col text-center">
+				<input type="text" placeholder="0x...."></input>
+			</div>
+		</div>
+	</div>
+	<table class="table border">
 		<thead>
 			<tr>
 				<th scope="col">#</th>

@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const path = require('path');
-const matches = require('./src/backend/matches.json');
+const matchesObj = require('./src/backend/matches.json');
 const fs = require('fs');
 const port = process.env.PORT || 3000;
 
@@ -11,6 +11,7 @@ const Web3 = require('web3');
 
 let current_user_address;
 let contractInstance;
+let contractOwner;
 
 app.use(express.urlencoded({
 	extended: false
@@ -31,17 +32,58 @@ async function init() {
 	} else {
 		console.log("error");
 	}
+
+	let matches = matchesObj.matches;
+
+	contractOwner = await contractInstance.methods.owner().call();
+
+	let contractAbi = eth.contract(Betting);
+	let myContract = contractAbi.at(contractAddress);
+	
+	web3.eth.sendTransaction({
+		to: Contractaddress,
+		from: Accountaddress,
+		data: getData
+	}, , function(err, txHash) {
+		if (err != null) {
+			console.error("Error while sending transaction: " + err);
+		} else {
+			console.log("Transaction Sent here's you  txHash: " + txHash);
+		}
+	});
+
+	const transaction = {
+		from: web3.eth.coinbase,
+		to: receiverAddress,
+		value: '0x00',
+		gas: gasEstimate + 1,
+		gasPrice: gasPrice + 1,
+		data: setData
+	}
+
+
+	web3.eth.sendTransaction(transaction);
+
+	//console.log(await contractInstance.methods.matchExists_f(2).call());
+	//console.log(await contractInstance.methods.matches(0).call())
 }
 
 init();
+
 
 app.get('/', (req, res) => {
 	res.sendFile(path.join(__dirname, '/src/frontend/main.html'));
 });
 
+
+app.get('/contractowner', (req, res) => {
+	res.json(contractOwner);
+});
+
 app.get('/getmatchesjson', (req, res) => {
 	res.json(matches);
 });
+
 
 app.post('/sendBet', async (req, res) => {
 
@@ -53,18 +95,13 @@ app.post('/sendBet', async (req, res) => {
 	// 	Account: current_account
 	// };
 
-	const solRes = await contractInstance.methods.makeMatch(0, 1, 2, 3).send({from: req.body.Account});
-	console.log(solRes);
 
-
-	const solMatches = await contractInstance.methods.matches().call();
-	console.log(solMatches);
-	
 	// TODO send betting info to contract
 	// TODO add err checks for post
 
 
 });
+
 
 
 

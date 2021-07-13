@@ -28,6 +28,36 @@
 			"Team_A_Win": "3",
 			"Team_B_Win": "5",
 			"gameday": "August 16th, 2021"
+		},
+		{
+			"matchID": "4",
+			"competition": "EU Liga",
+			"teamA": "Rusija",
+			"teamB": "Partizan",
+			"Tie": "2",
+			"Team_A_Win": "3",
+			"Team_B_Win": "5",
+			"gameday": "August 26th, 2021"
+		},{
+			"matchID": "5",
+			"competition": "EU Liga",
+			"teamA": "Radnicki",
+			"teamB": "Italija",
+			"Tie": "2",
+			"Team_A_Win": "3",
+			"Team_B_Win": "5",
+			"gameday": "September 1st, 2021"
+		},
+		{
+			"matchID": "6",
+			"competition": "EU Liga",
+			"teamA": "CZ",
+			"teamB": "Partizan",
+			"Tie": "2",
+			"Team_A_Win": "3",
+			"Team_B_Win": "5",
+			"gameday": "September 8th, 2021"
 		}
+
 	]
 }
