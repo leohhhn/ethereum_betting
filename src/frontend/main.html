@@ -16,7 +16,7 @@
 </head>
 
 <body>
-	<div class="jumbotron">
+	<div class="jumbotron mt-2 mb-2 pt-3 pb-3 border border-dark">
 		<div class="col text-center">
 			<p class="h1 pb-3"><strong>Ethereum Betting Platform</strong></p>
 			<button type="button" id="btnConnectMM" class="btn btn-primary btn-lg">Connect with MetaMask</button>
@@ -25,26 +25,27 @@
 		</div>
 	</div>
 
-	<div id="ownerDashboard" class="jumbotron my-container mx-auto border border-dark pt-2" style="display: none">
-		<div class="row m-2">
+	<div id="adminDashboard" class="jumbotron my-container mt-2 mb-2 pt-3 pb-3 border border-dark" style="display: none">
+		<div class="row mt-2">
 			<p class="h2 mx-auto">Welcome to the Admin Dashboard!</p>
 		</div>
-		<div class="row m-2">
+		<div class="row mt-2">
 		</div>
-		<div class="row m-2">
+		<div class="row mt-2">
+			<div class="col text-center" id="winnersDiv">
+				<input type="number" id="inputMatchID" placeholder="MatchID">
+				<input type="number" id="inputWinningType" placeholder="Winning type - (0, 1, 2)">
+			</div>
+			<div class="col text-center">
+				<input type="text" placeholder="Add a new admin address"></input>
+			</div>
+		</div>
+		<div class="row mt-2">
 			<div class="col text-center">
 				<button type="button" id="btnPayoutBets" class="btn btn-primary">Payout Bets</button>
 			</div>
 			<div class="col text-center">
-				<button type="button" id="btnAddAdmin" class="btn btn-primary">Add an admin</button>
-			</div>
-		</div>
-		<div class="row m-2">
-			<div class="col text-center" id="winnersDiv">
-				Winners: ssssssssssssssssssssssssssssssss
-			</div>
-			<div class="col text-center">
-				<input type="text" placeholder="0x...."></input>
+				<button type="button" id="btnAddAdmin" class="btn btn-primary">Add admin</button>
 			</div>
 		</div>
 	</div>
@@ -72,6 +73,7 @@
 </body>
 
 <script src="frontend/client.js"></script>
+
 
 
 </html>

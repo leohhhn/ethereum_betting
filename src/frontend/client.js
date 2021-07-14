@@ -11,6 +11,12 @@ let current_account;
 let isOwner = false;
 let mmConnected = 0;
 let dynButtonIDs = [];
+let adminDashboard;
+let contractArtifact;
+let abi;
+let contractAddress;
+let contractInstance;
+let web3;
 
 // metamask integration
 
@@ -25,7 +31,34 @@ connectMMButton.addEventListener('click', (e) => {
 		return;
 	}
 
+	fetch('/Betting.json')
+		.then(
+			res => {
+				return res.text();
+			})
+		.then(json => {
+			contractArtifact = JSON.parse(json);
+			abi = contractArtifact.abi;
+			let deployments = Object.keys(contractArtifact.networks);
+			contractAddress = contractArtifact.networks[deployments[deployments.length - 1]];
+			init();
+		}).catch(e => console.log(e));
+
 });
+
+async function init() {
+	web3 = new Web3(Web3.givenProvider || "http://127.0.0.1:9545/");
+	contractInstance = new web3.eth.Contract(abi, contractAddress.address);
+
+	if (typeof contractInstance !== 'undefined') {
+		console.log("contract instance created successfully");
+	} else {
+		console.log("error: contract instance undefined");
+	}
+
+	getOwner();
+}
+
 
 async function getAccounts() {
 	accounts = await ethereum.request({
@@ -33,46 +66,28 @@ async function getAccounts() {
 	});
 	current_account = accounts[0];
 	accountParag.innerHTML = "Account: " + current_account;
-	getOwner();
 	connectMMButton.classList.add('btn-success');
 	connectMMButton.innerHTML = "Connected to Metamask!";
-
 }
 
 async function getOwner() {
-	fetch('/contractowner', {
-		method: 'GET'
-	}).then(
-		res => {
-			if (res.ok)
-				return res.json();
-		}
-	).then((contractOwner) => {
-		if (contractOwner.toLowerCase() === current_account) {
-			console.log("youre the owner!!");
-			isOwner = true;
+	contractOwner = await contractInstance.methods.owner().call();
+	if (contractOwner.toLowerCase() === current_account) {
+		console.log("youre the owner!!");
+		isOwner = true;
+		//enable admin dashboard
+		adminDashboard = document.getElementById('adminDashboard').style.display = '';
+	} else {
+		isOwner = false; // if changed accounts reset bool
+		adminDashboard = document.getElementById('adminDashboard').style.display = 'none';
+	}
 
-
-			//enable admin dashboard
-
-		} else {
-			isOwner = false; // if changed accounts reset bool
-		}
-
-
-
-
-	}).catch((e) => console.log(e, "wtf"));
 }
-
 
 window.ethereum.on('accountsChanged', function(accounts) {
 	current_account = accounts[0];
 	accountParag.innerHTML = "Account: " + current_account;
 	getOwner();
-
-	//fetch('/')
-
 });
 
 // event listeners
@@ -107,6 +122,7 @@ function addDynEventListeners(buttonIDs) {
 			let betAmount = document.getElementById(`betAmount${i+1}`).value;
 			let radioButtons = document.getElementsByName(`selectBetType${i+1}`);
 			let typeOfBet = -1; // typeOfBet (0, 1, 2) - (Tie, TeamA, TeamB)
+			let matchID = i;
 
 			for (let j = 0; j < radioButtons.length; j++) {
 				if (radioButtons[j].checked)
@@ -124,18 +140,12 @@ function addDynEventListeners(buttonIDs) {
 
 				const placedBet = {
 					matchID: i, // backend matchIDs start from 0
-					betAmount: betAmount,
 					typeOfBet: typeOfBet,
 					Account: current_account
 				};
 
-				fetch('/sendBet', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify(placedBet)
-				});
+
+			//	let res = await contractInstance.methods.placeBet(matchID, typeOfBet, ).send({from: current_account, value: betAmount});
 
 				// TODO disable already clicked bet button
 
@@ -152,7 +162,7 @@ function addDynEventListeners(buttonIDs) {
 
 function buildTable(matchObj) {
 	let table = document.getElementById('matchTable');
-	let matches = matchObj.matches; // array of matches
+	matches = matchObj.matches; // array of matches
 
 	if (jsonIsLoaded == 0) {
 		for (let i = 0; i < matches.length; i++) {
