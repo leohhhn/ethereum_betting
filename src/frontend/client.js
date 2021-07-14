@@ -1,9 +1,3 @@
-console.log("client side js running");
-
-const btnGetMatches = document.getElementById('btnGetMatches');
-const connectMMButton = document.getElementById("btnConnectMM");
-const accountParag = document.getElementById("accountParag");
-
 let matches;
 let jsonIsLoaded = 0; // already loaded data from json into table - wont change as it is static (for now)
 let accounts;
@@ -17,6 +11,10 @@ let abi;
 let contractAddress;
 let contractInstance;
 let web3;
+
+const btnGetMatches = document.getElementById('btnGetMatches');
+const connectMMButton = document.getElementById("btnConnectMM");
+const accountParag = document.getElementById("accountParag");
 
 // metamask integration
 
@@ -119,15 +117,17 @@ function addDynEventListeners(buttonIDs) {
 				return;
 			}
 
-			let betAmount = document.getElementById(`betAmount${i+1}`).value;
-			let radioButtons = document.getElementsByName(`selectBetType${i+1}`);
+			let betAmount = document.getElementById(`betAmount${i}`).value;
+			let radioButtons = document.getElementsByName(`selectBetType${i}`);
 			let typeOfBet = -1; // typeOfBet (0, 1, 2) - (Tie, TeamA, TeamB)
 			let matchID = i;
+
 
 			for (let j = 0; j < radioButtons.length; j++) {
 				if (radioButtons[j].checked)
 					typeOfBet = j;
 			}
+
 			if (betAmount < 10000 || betAmount == '') {
 				//	TODO check if empty <input> returns undefined or just ''
 				alert('Minimum bet amount is 10k wei');
@@ -136,27 +136,45 @@ function addDynEventListeners(buttonIDs) {
 				alert('What are you betting on?');
 				return;
 			} else {
-				// creating and sending a bet
 
-				const placedBet = {
-					matchID: i, // backend matchIDs start from 0
-					typeOfBet: typeOfBet,
-					Account: current_account
-				};
+				let oddsForWinning;
+				switch (typeOfBet) {
+					case 0:
+						oddsForWinning = matches[i].Tie;
+						break;
+					case 1:
+						oddsForWinning = matches[i].Team_A_Win;
+						break;
+					case 2:
+						oddsForWinning = matches[i].Tie;
+						break;
+				}
 
+				placeABet(i, typeOfBet, oddsForWinning, betAmount);
 
-			//	let res = await contractInstance.methods.placeBet(matchID, typeOfBet, ).send({from: current_account, value: betAmount});
-
-				// TODO disable already clicked bet button
-
-				alert("Bet successfully placed! Good luck!");
-				console.log("Successful bet!", placedBet);
-
+				// TODO disable already clicked bet button and reset
+				console.log({i, typeOfBet, oddsForWinning, betAmount});
 			}
 		});
 	}
 }
 
+async function placeABet(matchID, typeOfBet, oddsForWinning, betAmount) {
+
+	if (typeof contractInstance !== 'undefined') {
+		console.log("contract instance created successfully");
+	} else {
+		console.log("can't reach contract instance");
+	}
+
+	let res = await contractInstance.methods.placeBet(matchID, typeOfBet, oddsForWinning).send({
+		from: current_account,
+		value: betAmount.toString()
+	}).catch(e => {return e;});
+
+	console.log(res);
+
+}
 
 // build matches table
 
@@ -166,6 +184,7 @@ function buildTable(matchObj) {
 
 	if (jsonIsLoaded == 0) {
 		for (let i = 0; i < matches.length; i++) {
+			// fix ffs
 			let row = `
 			<tr>
 				<td>${matches[i].matchID}</td>
@@ -176,15 +195,15 @@ function buildTable(matchObj) {
 				<td>${matches[i].Team_A_Win}</td>
 				<td>${matches[i].Team_B_Win}</td>
 				<td>${matches[i].gameday}</td>
-				<td><input type="radio" id="betTie${i+1}" name="selectBetType${i+1}"></input></td>
-				<td><input type="radio" id="betTeamA${i+1}" name="selectBetType${i+1}"></input></td>
-				<td><input type="radio" id="betTeamB${i+1}" name="selectBetType${i+1}"></input></td>
-				<td><input type="number" id="betAmount${i+1}"></input></td>
-				<td><button type="button" id="btnGetMatches${i+1}" class="btn btn-primary">Place bet!</button></td>
+				<td><input type="radio" id="betTie${i}" name="selectBetType${i}"></input></td>
+				<td><input type="radio" id="betTeamA${i}" name="selectBetType${i}"></input></td>
+				<td><input type="radio" id="betTeamB${i}" name="selectBetType${i}"></input></td>
+				<td><input type="number" id="betAmount${i}"></input></td>
+				<td><button type="button" id="btnGetMatches${i}" class="btn btn-primary">Place bet!</button></td>
 			</tr>
 		  `;
 			table.innerHTML += row;
-			dynButtonIDs[i] = `btnGetMatches${i+1}`; // 0th button has id 1
+			dynButtonIDs[i] = `btnGetMatches${i}`; // 0th button has id 1
 		}
 		jsonIsLoaded = 1;
 		//console.log(dynButtonIDs);

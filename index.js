@@ -52,25 +52,6 @@ app.get('/getmatchesjson', (req, res) => {
 });
 
 
-app.post('/sendBet', async (req, res) => {
-
-	// post request format
-	// const placedBet = {
-	// 	matchID: i, // backend matchIDs start from 0
-	// 	betAmount: betAmount,
-	// 	typeOfBet: typeOfBet,
-	// 	Account: current_account
-	// };
-
-
-	// TODO send betting info to contract
-	// TODO add err checks for post
-
-
-});
-
-
-
 
 app.listen(port, () => {
 	console.log(`listening on port ${port}...`);
