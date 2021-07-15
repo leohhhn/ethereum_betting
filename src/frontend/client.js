@@ -8,6 +8,7 @@ let dynButtonIDs = [];
 let adminDashboard;
 let contractArtifact;
 let abi;
+//let contractAddress = '0xfDDC1cCf90C3973D1d1DFb032BB7C0b4C9009d87'; // deploy address on ropsten
 let contractAddress;
 let contractInstance;
 let contractOwner;
@@ -45,6 +46,7 @@ btnConnectMM.addEventListener('click', (e) => {
 			abi = contractArtifact.abi;
 			let deployments = Object.keys(contractArtifact.networks);
 			contractAddress = contractArtifact.networks[deployments[deployments.length - 1]];
+			contractAddress = contractAddress.address;
 			init();
 		}).catch(e => console.log(e));
 
@@ -54,14 +56,15 @@ btnConnectMM.addEventListener('click', (e) => {
 
 async function init() {
 	// initialize web3 and contract instance
-	web3 = new Web3(Web3.givenProvider || "http://127.0.0.1:9545/");
-	contractInstance = new web3.eth.Contract(abi, contractAddress.address);
-
+	web3 = new Web3(Web3.givenProvider || "https://ropsten.infura.io/v3/4d93ddd7ecf446f4956be00a0fda13c9");
+	// contract deployed to ropsten address
+	contractInstance = new web3.eth.Contract(abi, contractAddress);
 	if (typeof contractInstance !== 'undefined') {
 		console.log("contract instance created successfully");
 	} else {
 		console.log("error: contract instance undefined");
 	}
+
 
 	getOwner();
 }
@@ -99,7 +102,7 @@ async function payoutWinners(matchID, winningType) {
 
 	if (isOwner) {
 		let res = await contractInstance.methods.payWinningBets(
-			matchID.toString(), winningType.toString()).send({
+			(matchID - 1).toString(), winningType.toString()).send({
 			from: current_account
 		});
 		console.log(res);
@@ -130,6 +133,9 @@ btnGetMatches.addEventListener('click', e => {
 			buildTable(matches)
 		})
 		.catch((e) => console.log(e));
+
+
+
 });
 
 btnPayoutBets.addEventListener('click', e => {
@@ -159,8 +165,8 @@ function addDynEventListeners(buttonIDs) {
 				alert("MetaMask not connected or has error");
 				return;
 			}
-
-			let betAmount = document.getElementById(`betAmount${i}`).value;
+			let betInput = document.getElementById(`betAmount${i}`);
+			let betAmount = betInput.value;
 			let radioButtons = document.getElementsByName(`selectBetType${i}`);
 			let typeOfBet = -1; // typeOfBet (0, 1, 2) - (Tie, TeamA, TeamB)
 			let matchID = i;
@@ -195,12 +201,17 @@ function addDynEventListeners(buttonIDs) {
 				placeABet(i, typeOfBet, oddsForWinning, betAmount);
 
 				// TODO disable already clicked bet button and reset
+				radioButtons[typeOfBet].checked = false;
+				betInput.value = '';
+
 				console.log({
 					i,
 					typeOfBet,
 					oddsForWinning,
 					betAmount
 				});
+
+
 			}
 		});
 	}
@@ -228,14 +239,13 @@ async function placeABet(matchID, typeOfBet, oddsForWinning, betAmount) {
 }
 
 // build matches table
-
+let str = '';
 function buildTable(matchObj) {
 	let table = document.getElementById('matchTable');
 	matches = matchObj.matches; // array of matches
 
 	if (jsonIsLoaded == 0) {
 		for (let i = 0; i < matches.length; i++) {
-			// fix ffs
 			let row = `
 			<tr>
 				<td>${i+1}</td>
@@ -257,7 +267,6 @@ function buildTable(matchObj) {
 			dynButtonIDs[i] = `btnGetMatches${i}`; // 0th button has id 1
 		}
 		jsonIsLoaded = 1;
-		//console.log(dynButtonIDs);
 		addDynEventListeners(dynButtonIDs);
 	}
 }

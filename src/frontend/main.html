@@ -31,15 +31,23 @@
 		</div>
 		<div class="row mt-2">
 		</div>
+		<div class="row">
+			<div class="col text-center">
+				<span id="availableMatchesS">Possible payout matches:</span>
+				<span>| Winning type:</span>
+
+			</div>
+		</div>
 		<div class="row mt-2">
 			<div class="col text-center" id="winnersDiv">
-				<input type="number" id="inputMatchID" placeholder="MatchID">
-				<input type="number" id="inputWinningType" placeholder="Winning type - (0, 1, 2)">
+				<input type="number" id="inputMatchID" style="width:250px" placeholder="Match #">
+				<input type="number" id="inputWinningType" style="width:250px" placeholder="(Tie, TeamA, TeamB) - (0, 1, 2)">
 			</div>
 			<!-- <div class="col text-center">
 				<input type="text" placeholder="Add a new admin address"></input>
 			</div> -->
 		</div>
+
 		<div class="row mt-2">
 			<div class="col text-center">
 				<button type="button" id="btnPayoutBets" class="btn btn-primary">Payout Bets</button>
