@@ -1,6 +1,6 @@
 {
 	"matches": [{
-			"matchID": "1",
+			"matchID": "0",
 			"competition": "UEFA Champions League",
 			"teamA": "Bayern",
 			"teamB": "PSG",
@@ -10,7 +10,7 @@
 			"gameday": "August 3rd, 2021"
 		},
 		{
-			"matchID": "2",
+			"matchID": "1",
 			"competition": "UEFA Champions League",
 			"teamA": "Crvena Zvezda",
 			"teamB": "Milano",
@@ -20,7 +20,7 @@
 			"gameday": "August 4th, 2021"
 		},
 		{
-			"matchID": "3",
+			"matchID": "2",
 			"competition": "Srpska Liga",
 			"teamA": "Radnicki",
 			"teamB": "Partizan",
@@ -30,7 +30,7 @@
 			"gameday": "August 16th, 2021"
 		},
 		{
-			"matchID": "4",
+			"matchID": "3",
 			"competition": "EU Liga",
 			"teamA": "Rusija",
 			"teamB": "Partizan",
@@ -39,7 +39,7 @@
 			"Team_B_Win": "5",
 			"gameday": "August 26th, 2021"
 		},{
-			"matchID": "5",
+			"matchID": "4",
 			"competition": "EU Liga",
 			"teamA": "Radnicki",
 			"teamB": "Italija",
@@ -49,7 +49,7 @@
 			"gameday": "September 1st, 2021"
 		},
 		{
-			"matchID": "6",
+			"matchID": "5",
 			"competition": "EU Liga",
 			"teamA": "CZ",
 			"teamB": "Partizan",
@@ -58,6 +58,5 @@
 			"Team_B_Win": "5",
 			"gameday": "September 8th, 2021"
 		}
-
 	]
 }

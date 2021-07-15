@@ -3,27 +3,33 @@ let jsonIsLoaded = 0; // already loaded data from json into table - wont change 
 let accounts;
 let current_account;
 let isOwner = false;
-let mmConnected = 0;
+let mmConnected = false;
 let dynButtonIDs = [];
 let adminDashboard;
 let contractArtifact;
 let abi;
 let contractAddress;
 let contractInstance;
+let contractOwner;
+let gotOwner = false;
 let web3;
 
+
 const btnGetMatches = document.getElementById('btnGetMatches');
-const connectMMButton = document.getElementById("btnConnectMM");
+const btnConnectMM = document.getElementById("btnConnectMM");
 const accountParag = document.getElementById("accountParag");
+//const btnAddAdmin = document.getElementById("btnAddAdmin"); // TODO add later
+const btnPayoutBets = document.getElementById("btnPayoutBets");
 
-// metamask integration
 
-connectMMButton.addEventListener('click', (e) => {
+// metamask integration & eth-related functions
+
+btnConnectMM.addEventListener('click', (e) => {
 	if (typeof window.ethereum !== 'undefined') {
-		//	console.log("metamask is installed");
-		getAccounts();
-		connectMMButton.disabled = true;
-		mmConnected = 1;
+		getAccounts().catch(e => console.log(e)); //
+		// TODO fix thrown error when metamask is not on the correct network
+		btnConnectMM.disabled = true;
+		mmConnected = true;
 	} else {
 		alert("Please install MetaMask to use this app.");
 		return;
@@ -42,9 +48,12 @@ connectMMButton.addEventListener('click', (e) => {
 			init();
 		}).catch(e => console.log(e));
 
+	// TODO add cookies?
+
 });
 
 async function init() {
+	// initialize web3 and contract instance
 	web3 = new Web3(Web3.givenProvider || "http://127.0.0.1:9545/");
 	contractInstance = new web3.eth.Contract(abi, contractAddress.address);
 
@@ -57,32 +66,48 @@ async function init() {
 	getOwner();
 }
 
-
 async function getAccounts() {
+	// load in accounts from metamask
 	accounts = await ethereum.request({
 		method: 'eth_requestAccounts'
 	});
 	current_account = accounts[0];
 	accountParag.innerHTML = "Account: " + current_account;
-	connectMMButton.classList.add('btn-success');
-	connectMMButton.innerHTML = "Connected to Metamask!";
+	btnConnectMM.classList.add('btn-success');
+	btnConnectMM.innerHTML = "Connected to Metamask!";
 }
 
 async function getOwner() {
-	contractOwner = await contractInstance.methods.owner().call();
-	if (contractOwner.toLowerCase() === current_account) {
-		console.log("youre the owner!!");
+	// get owner of owner and display admin dashboard
+	if (gotOwner === false) {
+		contractOwner = await contractInstance.methods.owner().call();
+		gotOwner = true;
+	}
+
+	if (contractOwner.toLowerCase() === current_account.toLowerCase()) {
+		//console.log("youre the owner!!");
 		isOwner = true;
 		//enable admin dashboard
 		adminDashboard = document.getElementById('adminDashboard').style.display = '';
 	} else {
-		isOwner = false; // if changed accounts reset bool
+		isOwner = false; // the current address is not the owner
 		adminDashboard = document.getElementById('adminDashboard').style.display = 'none';
 	}
+}
 
+async function payoutWinners(matchID, winningType) {
+
+	if (isOwner) {
+		let res = await contractInstance.methods.payWinningBets(
+			matchID.toString(), winningType.toString()).send({
+			from: current_account
+		});
+		console.log(res);
+	}
 }
 
 window.ethereum.on('accountsChanged', function(accounts) {
+	// when metamask account changes
 	current_account = accounts[0];
 	accountParag.innerHTML = "Account: " + current_account;
 	getOwner();
@@ -90,7 +115,8 @@ window.ethereum.on('accountsChanged', function(accounts) {
 
 // event listeners
 
-btnGetMatches.addEventListener('click', (e) => {
+btnGetMatches.addEventListener('click', e => {
+	// get matches json from server
 	fetch('/getmatchesjson', {
 			method: 'GET'
 		})
@@ -106,8 +132,25 @@ btnGetMatches.addEventListener('click', (e) => {
 		.catch((e) => console.log(e));
 });
 
+btnPayoutBets.addEventListener('click', e => {
+
+	let winningType = document.getElementById('inputWinningType').value;
+	let mID = document.getElementById('inputMatchID').value;
+
+	// // err checks
+	// if (winningType !== 0 || winningType !== 1 || winningType !== 2) {
+	// 	console.log("invalid input type", winningType, typeof winningType);
+	// 	return;
+	// } else if (mID < 0 || mID > matches.length - 1) {
+	// 	console.log(mID + " is invalid, min 0 max " + matches.length - 1);
+	// 	return;
+	// }
+
+	payoutWinners(mID, winningType);
+});
+
 function addDynEventListeners(buttonIDs) {
-	// IDs in html start from 1
+	// add event listeners for dynamically created buttons
 
 	for (let i = 0; i < buttonIDs.length; i++) {
 		$(document).on('click', '#' + buttonIDs[i], function() {
@@ -121,7 +164,6 @@ function addDynEventListeners(buttonIDs) {
 			let radioButtons = document.getElementsByName(`selectBetType${i}`);
 			let typeOfBet = -1; // typeOfBet (0, 1, 2) - (Tie, TeamA, TeamB)
 			let matchID = i;
-
 
 			for (let j = 0; j < radioButtons.length; j++) {
 				if (radioButtons[j].checked)
@@ -153,7 +195,12 @@ function addDynEventListeners(buttonIDs) {
 				placeABet(i, typeOfBet, oddsForWinning, betAmount);
 
 				// TODO disable already clicked bet button and reset
-				console.log({i, typeOfBet, oddsForWinning, betAmount});
+				console.log({
+					i,
+					typeOfBet,
+					oddsForWinning,
+					betAmount
+				});
 			}
 		});
 	}
@@ -162,17 +209,21 @@ function addDynEventListeners(buttonIDs) {
 async function placeABet(matchID, typeOfBet, oddsForWinning, betAmount) {
 
 	if (typeof contractInstance !== 'undefined') {
-		console.log("contract instance created successfully");
+		// another check, just in case
+		console.log("contract is instantiated");
 	} else {
 		console.log("can't reach contract instance");
 	}
 
-	let res = await contractInstance.methods.placeBet(matchID, typeOfBet, oddsForWinning).send({
+	let res = await contractInstance.methods.placeBet(matchID.toString(), typeOfBet.toString(), oddsForWinning.toString()).send({
 		from: current_account,
 		value: betAmount.toString()
-	}).catch(e => {return e;});
+	}).catch(e => {
+		return e
+	});
 
 	console.log(res);
+	//console.log(await contractInstance.methods.balance().call());
 
 }
 
@@ -187,7 +238,7 @@ function buildTable(matchObj) {
 			// fix ffs
 			let row = `
 			<tr>
-				<td>${matches[i].matchID}</td>
+				<td>${i+1}</td>
 				<td>${matches[i].competition}</td>
 				<td>${matches[i].teamA}</td>
 				<td>${matches[i].teamB}</td>
@@ -208,6 +259,5 @@ function buildTable(matchObj) {
 		jsonIsLoaded = 1;
 		//console.log(dynButtonIDs);
 		addDynEventListeners(dynButtonIDs);
-
 	}
 }

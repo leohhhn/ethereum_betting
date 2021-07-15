@@ -33,7 +33,7 @@ contract Betting {
        	//require(msg.value == 1 ether, "initial amount should be 1 eth");
         owner = msg.sender;
         bettingAdmins[owner] = 1;
-        betDeadline = block.timestamp + 365 days; // example deadline
+        betDeadline = block.timestamp + 64 days; // example deadline
 		makeMatches();
     }
 
@@ -43,12 +43,14 @@ contract Betting {
     }
 
 	function makeMatches() internal {
-		makeMatch(1, 3, 2, 3);
-		makeMatch(2, 2, 9, 2);
+		// create matches with same attributes as in JSON
+		// TODO make this dynamic, through oracles
+		makeMatch(0, 3, 2, 3);
+		makeMatch(1, 2, 9, 2);
+		makeMatch(2, 2, 3, 5);
 		makeMatch(3, 2, 3, 5);
 		makeMatch(4, 2, 3, 5);
 		makeMatch(5, 2, 3, 5);
-		makeMatch(6, 2, 3, 5);
 	}
 
 	function makeMatch(uint16 matchID, uint8 tieQuote, uint8 teamAQuote, uint8 teamBQuote) public onlyAdmin {
@@ -86,13 +88,13 @@ contract Betting {
         emit payoutComplete(winners);
     }
 
-    function addAdmin(address newAdminAddress) external onlyAdmin {
+    /* function addAdmin(address newAdminAddress) external onlyAdmin {
         bettingAdmins[newAdminAddress] = 1;
     }
 
     function deleteAdmin(address adminAddress) external onlyAdmin {
 		delete bettingAdmins[adminAddress];
-	}
+	} */
 
 
 	function matchExists_f(uint16 matchID) view external onlyAdmin returns(bool){
