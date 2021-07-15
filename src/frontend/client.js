@@ -8,10 +8,11 @@ let dynButtonIDs = [];
 let adminDashboard;
 let contractArtifact;
 let abi;
-//let contractAddress = '0xfDDC1cCf90C3973D1d1DFb032BB7C0b4C9009d87'; // deploy address on ropsten
-let contractAddress;
+let contractAddress = '0xfDDC1cCf90C3973D1d1DFb032BB7C0b4C9009d87'; // deploy address on ropsten
+//let contractAddress;
 let contractInstance;
 let contractOwner;
+let contractBalance;
 let gotOwner = false;
 let web3;
 
@@ -27,7 +28,7 @@ const btnPayoutBets = document.getElementById("btnPayoutBets");
 
 btnConnectMM.addEventListener('click', (e) => {
 	if (typeof window.ethereum !== 'undefined') {
-		getAccounts().catch(e => console.log(e)); //
+		getAccounts().catch(e => console.log(e));
 		// TODO fix thrown error when metamask is not on the correct network
 		btnConnectMM.disabled = true;
 		mmConnected = true;
@@ -44,9 +45,8 @@ btnConnectMM.addEventListener('click', (e) => {
 		.then(json => {
 			contractArtifact = JSON.parse(json);
 			abi = contractArtifact.abi;
-			let deployments = Object.keys(contractArtifact.networks);
-			contractAddress = contractArtifact.networks[deployments[deployments.length - 1]];
-			contractAddress = contractAddress.address;
+			// let deployments = Object.keys(contractArtifact.networks);
+			// contractAddress = contractArtifact.networks[deployments[deployments.length - 1]];
 			init();
 		}).catch(e => console.log(e));
 
@@ -56,15 +56,18 @@ btnConnectMM.addEventListener('click', (e) => {
 
 async function init() {
 	// initialize web3 and contract instance
-	web3 = new Web3(Web3.givenProvider || "https://ropsten.infura.io/v3/4d93ddd7ecf446f4956be00a0fda13c9");
 	// contract deployed to ropsten address
+	web3 = new Web3(Web3.givenProvider || "https://ropsten.infura.io/v3/4d93ddd7ecf446f4956be00a0fda13c9");
 	contractInstance = new web3.eth.Contract(abi, contractAddress);
+
+	//	web3 = new Web3(Web3.givenProvider || "https://localhost:9545");
+	//	contractInstance = new web3.eth.Contract(abi, contractAddress.address);
+
 	if (typeof contractInstance !== 'undefined') {
-		console.log("contract instance created successfully");
+		//console.log("contract instance created successfully");
 	} else {
 		console.log("error: contract instance undefined");
 	}
-
 
 	getOwner();
 }
@@ -80,6 +83,13 @@ async function getAccounts() {
 	btnConnectMM.innerHTML = "Connected to Metamask!";
 }
 
+async function updateBalance() {
+	contractBalance = await contractInstance.methods.getContractBalance().call();
+	contractBalance = web3.utils.fromWei(contractBalance, 'ether');
+	document.getElementById('contractBalanceP').innerHTML = contractBalance + " eth currently in contract.";
+	//console.log("updating balance...");
+}
+
 async function getOwner() {
 	// get owner of owner and display admin dashboard
 	if (gotOwner === false) {
@@ -92,6 +102,7 @@ async function getOwner() {
 		isOwner = true;
 		//enable admin dashboard
 		adminDashboard = document.getElementById('adminDashboard').style.display = '';
+		updateBalance();
 	} else {
 		isOwner = false; // the current address is not the owner
 		adminDashboard = document.getElementById('adminDashboard').style.display = 'none';
@@ -105,7 +116,9 @@ async function payoutWinners(matchID, winningType) {
 			(matchID - 1).toString(), winningType.toString()).send({
 			from: current_account
 		});
-		console.log(res);
+		//	console.log(res);
+		document.getElementById("inputMatchID").innerHTML = "";
+		document.getElementById("inputWinningType").innerHTML = "";
 	}
 }
 
@@ -203,13 +216,14 @@ function addDynEventListeners(buttonIDs) {
 				// TODO disable already clicked bet button and reset
 				radioButtons[typeOfBet].checked = false;
 				betInput.value = '';
+				updateBalance();
 
-				console.log({
-					i,
-					typeOfBet,
-					oddsForWinning,
-					betAmount
-				});
+				// console.log({
+				// 	i,
+				// 	typeOfBet,
+				// 	oddsForWinning,
+				// 	betAmount
+				// });
 
 
 			}
@@ -219,13 +233,6 @@ function addDynEventListeners(buttonIDs) {
 
 async function placeABet(matchID, typeOfBet, oddsForWinning, betAmount) {
 
-	if (typeof contractInstance !== 'undefined') {
-		// another check, just in case
-		console.log("contract is instantiated");
-	} else {
-		console.log("can't reach contract instance");
-	}
-
 	let res = await contractInstance.methods.placeBet(matchID.toString(), typeOfBet.toString(), oddsForWinning.toString()).send({
 		from: current_account,
 		value: betAmount.toString()
@@ -233,19 +240,20 @@ async function placeABet(matchID, typeOfBet, oddsForWinning, betAmount) {
 		return e
 	});
 
-	console.log(res);
+	//console.log(res);
 	//console.log(await contractInstance.methods.balance().call());
 
 }
 
 // build matches table
-let str = '';
+
 function buildTable(matchObj) {
 	let table = document.getElementById('matchTable');
 	matches = matchObj.matches; // array of matches
 
 	if (jsonIsLoaded == 0) {
 		for (let i = 0; i < matches.length; i++) {
+
 			let row = `
 			<tr>
 				<td>${i+1}</td>
