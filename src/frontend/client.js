@@ -213,7 +213,6 @@ function addDynEventListeners(buttonIDs) {
 
 				placeABet(i, typeOfBet, oddsForWinning, betAmount);
 
-				// TODO disable already clicked bet button and reset
 				radioButtons[typeOfBet].checked = false;
 				betInput.value = '';
 				updateBalance();
